@@ -19,6 +19,7 @@ const CreateUser = () => {
     const handleSubmit = async (e) => {
         const response = await createUser(formData);
         console.log(response)
+        alert(response)
     }
     return (
         <div className='p-12'>

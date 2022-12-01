@@ -25,9 +25,9 @@ const Createjourney = () => {
     const createANewJourney = async () => {
         const confirm = window.confirm("Please confirm ?");
         if (confirm) {
-            console.log(formData)
-            // const response = await createJourney(formData)
-            // console.log(response)
+            console.log({ ...formData, journeyStartTime: new Date(formData.journeyStartTime).toISOString().replace('Z', '') })
+            const response = await createJourney({ ...formData, journeyStartTime: new Date(formData.journeyStartTime).toISOString().replace('Z', '') })
+            console.log(response)
         }
     }
 
@@ -78,7 +78,7 @@ const Createjourney = () => {
                     placeholder='Journey Start Time'
                     value={formData.journeyStartTime}
                     onChange={(e) => setFormData({ ...formData, journeyStartTime: e.target.value })}
-                    type="text"
+                    type="date"
                     className='standardInput' />
                 <input
                     placeholder='Journey Purpose'
@@ -117,7 +117,6 @@ const Createjourney = () => {
                         style={{ margin: 0, marginBottom: "1rem" }}
                         value={selectedPair.vehiclePosition}
                         onChange={e => {
-                            console.log(e.target.value)
                             // if (e.target.value === null)
                             //     setVehiclePosition(1)
                             // if (parseInt(e.target.value) < formData.convoySize)

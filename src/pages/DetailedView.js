@@ -3,20 +3,34 @@ import { loadModules } from "esri-loader";
 import Loader from "../components/loaders/Loader";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { detailedView } from "../global/api";
-import _ from "lodash";
+import _, { initial } from "lodash";
 import { colorLine } from "../global/defaultValues";
 import { useQuery } from "react-query";
+import { InputSwitch } from 'primereact/inputswitch';
+import { motion } from "framer-motion"
+import { editJourney } from "../global/api";
 
 const Route = () => {
     const [searchParams] = useSearchParams();
     console.log(searchParams.get('journeyId'))
+    const [toggleEdit, setToggleEdit] = useState(false)
     const location = useLocation();
     const MapElement = useRef(null);
-    const [latlog, setLatlog] = useState([]);
     const [mapExpanded, setMapExpanded] = useState(false)
     const { data, error, isLoading } = useQuery('detailedView', () => detailedView({
         journeyId: searchParams.get('journeyId')
     }))
+    const [formData, setFormData] = useState({
+        journeyName: "",
+        journeyStartLocation: "",
+        journeyEndLocation: "",
+        journeyStartTime: "",
+        journeyPurpose: "",
+        journeyComplete: false
+    });
+    const handleEdit = async () => {
+        const response = await editJourney(formData)
+    }
 
     useEffect(() => {
         let view;
@@ -159,113 +173,194 @@ const Route = () => {
                                 view.graphics.add(graphic_symbol);
                             });
                     }
-            })
-            // }
+                })
+                // }
                 watchUtils.whenTrue(view, "updating", function (evt) {
-                if (document.getElementById("loaderElement"))
-                    document.getElementById("loaderElement").style.display = "block";
-            });
+                    if (document.getElementById("loaderElement"))
+                        document.getElementById("loaderElement").style.display = "block";
+                });
 
-            // Hide the loading indicator when the view stops updating
-            watchUtils.whenFalse(view, "updating", function (evt) {
-                if (document.getElementById("loaderElement"))
-                    document.getElementById("loaderElement").style.display = "none";
+                // Hide the loading indicator when the view stops updating
+                watchUtils.whenFalse(view, "updating", function (evt) {
+                    if (document.getElementById("loaderElement"))
+                        document.getElementById("loaderElement").style.display = "none";
+                });
             });
-        });
-    })();
+        })();
 
-    return () => {
-        if (!!view) {
-            view.destroy();
-            view = null;
+        return () => {
+            if (!!view) {
+                view.destroy();
+                view = null;
+            }
+        };
+    }, [location.query]);
+
+    useEffect(() => {
+        if (data) {
+            console.log(data)
+            setFormData({
+                journeyName: data.journey.journeyName,
+                journeyPurpose: data.journey.journeyPurpose,
+                journeyEndLocation: data.journey.journeyEndLocation,
+                journeyStartLocation: data.journey.journeyStartLocation,
+                journeyStartTime: data.journey.journeyStartTime.slice(0, 10),
+                journeyComplete: data.journey.journeyComplete
+            })
         }
-    };
-}, [location.query]);
+    }, [data])
 
-if (error) return <>{console.log(error)}</>
-if (isLoading) return <Loader text="Loading..." />
+    if (error) return <>{console.log(error)}</>
+    if (isLoading) return <Loader text="Loading..." />
 
-return (
-    <div className="flex">
+    return (
+        <div className="flex">
 
-        <div className="flex relative">
-            <div>
-                <div
-                    className="mapLayer relative shadow-xl"
-                    style={{
-                        height: "calc(100vh - 136px)",
-                        width: mapExpanded ? "90vw" : "30vw",
-                        transition: "all 0.3s ease"
-                    }}
-                    ref={MapElement}
-                >
-                    <div id="loaderElement" className="loadingMap">
-                        <Loader text="It may take several moments.." />
+            <div className="flex relative">
+                <div>
+                    <div
+                        className="mapLayer relative shadow-xl"
+                        style={{
+                            height: "calc(100vh - 136px)",
+                            width: mapExpanded ? "90vw" : "30vw",
+                            transition: "all 0.3s ease"
+                        }}
+                        ref={MapElement}
+                    >
+                        <div id="loaderElement" className="loadingMap">
+                            <Loader text="It may take several moments.." />
+                        </div>
                     </div>
                 </div>
+                <button
+                    onClick={() => setMapExpanded(!mapExpanded)}
+                    style={{ position: "absolute", top: "50%", right: "2rem" }}
+                    className="basicDarkButton p-2 "  >
+                    {
+                        mapExpanded ?
+                            <i className="pi pi-chevron-left z-10" style={{ color: "white" }}></i>
+                            :
+                            <i className="pi pi-chevron-right z-10" style={{ color: "white" }}></i>
+
+                    }
+
+                </button>
             </div>
-            <button
-                onClick={() => setMapExpanded(!mapExpanded)}
-                style={{ position: "absolute", top: "50%", right: "2rem" }}
-                className="basicDarkButton p-2 "  >
+            <div className={`p-12 w-full ${mapExpanded ? 'opacity-5' : 'opacity-100'}`}>
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold">{data.journey.journeyName}</h1>
+                    <button className="basicDarkButton"
+                        style={{ border: "2px solid var(--base-color)", background: "white", color: "var(--base-color)" }}
+                        onClick={() => setToggleEdit(!toggleEdit)}
+                    >Edit</button>
+                </div>
                 {
-                    mapExpanded ?
-                        <i className="pi pi-chevron-left z-10" style={{ color: "white" }}></i>
+                    toggleEdit
+                        ?
+                        <motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 50 }}
+                        >
+                            <div>
+                                <div className="grid grid-cols-[repeat(3,1fr),2fr,1fr,1fr] text-center text-xs uppercase mt-12">
+                                    <p className="border-2 p-2">Journey Id</p>
+                                    <p className="border-2 p-2">Convoy Size</p>
+                                    <p className="border-2 p-2">End Location</p>
+                                    <p className="border-2 p-2">Purpose</p>
+                                    <p className="border-2 p-2">Start Location</p>
+                                    <p className="border-2 p-2">Start Time</p>
+                                </div>
+
+                                <div className="grid grid-cols-[repeat(3,1fr),2fr,1fr,1fr] text-center text-sm font-semibold mb-2">
+                                    <p className="border-2 p-2">{data.journey.journeyId}</p>
+                                    <p className="border-2 p-2">{data.journey.convoySize}</p>
+                                    <p className="border-2 p-2">{data.journey.journeyEndLocation}</p>
+                                    <p className="border-2 p-2">{data.journey.journeyPurpose}</p>
+                                    <p className="border-2 p-2">{data.journey.journeyStartLocation}</p>
+                                    <p className="border-2 p-2">{data.journey.journeyStartTime}</p>
+                                </div>
+                            </div>
+                            <div className='text-sm'>
+                                <div className="grid grid-cols-7">
+                                    <span className='text-xs uppercase border-2 p-2'>Id</span>
+                                    <span className='text-xs uppercase border-2 p-2'>device Id</span>
+                                    <span className='text-xs uppercase border-2 p-2'>device name</span>
+                                    <span className='text-xs uppercase border-2 p-2'>vehicle Position</span>
+                                    <span className='text-xs uppercase border-2 p-2'>vehicle Number</span>
+                                    <span className='text-xs uppercase border-2 p-2'>vehicle Model</span>
+                                    <span className='text-xs uppercase border-2 p-2'>vehicle Company</span>
+                                </div>
+                                {
+                                    _.map(data.convoy, (item, idx) => {
+                                        return <div key={idx} className="grid grid-cols-7">
+                                            <p className='border-2 p-2 font-semibold'>{item.id}</p>
+                                            <p className='border-2 p-2 font-semibold'>{item.device.deviceId}</p>
+                                            <p className='border-2 p-2 font-semibold'>{item.device.deviceName}</p>
+                                            <p className='border-2 p-2 font-semibold'>{item.vehiclePosition}</p>
+                                            <p className='border-2 p-2 font-semibold'>{item.vehicle.vehicleNumber}</p>
+                                            <p className='border-2 p-2 font-semibold'>{item.vehicle.vehicleModel}</p>
+                                            <p className='border-2 p-2 font-semibold'>{item.vehicle.vehicleCompany}</p>
+                                        </div>
+                                    })
+                                }
+                            </div>
+
+                        </motion.div>
                         :
-                        <i className="pi pi-chevron-right z-10" style={{ color: "white" }}></i>
+                        <motion.div
+                            className="mt-12"
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 50 }}
+                        >
+                            <div className='grid grid-cols-2 w-full'>
+                                <input
+                                    placeholder='Journey Name'
+                                    value={formData.journeyName}
+                                    onChange={(e) => setFormData({ ...formData, journeyName: e.target.value })}
+                                    type="text"
+                                    className='standardInput' />
+                                <input
+                                    placeholder='Journey Start Location'
+                                    value={formData.journeyStartLocation}
+                                    onChange={(e) => setFormData({ ...formData, journeyStartLocation: e.target.value })}
+                                    type="text"
+                                    className='standardInput' />
+                                <input
+                                    placeholder='Journey End Location'
+                                    value={formData.journeyEndLocation}
+                                    onChange={(e) => setFormData({ ...formData, journeyEndLocation: e.target.value })}
+                                    type="text"
+                                    className='standardInput' />
+                                <input
+                                    placeholder='Journey Start Time'
+                                    value={formData.journeyStartTime}
+                                    onChange={(e) => setFormData({ ...formData, journeyStartTime: e.target.value })}
+                                    type="date"
+                                    className='standardInput' />
+                                <input
+                                    placeholder='Journey Purpose'
+                                    value={formData.journeyPurpose}
+                                    onChange={(e) => setFormData({ ...formData, journeyPurpose: e.target.value })}
+                                    type="text"
+                                    className='standardInput' />
+                                <div className="text-sm flex justify-between items-center">
+                                    <p>Toggle to complete/uncomplete journey</p>
+                                    <InputSwitch checked={formData.journeyComplete} onChange={(e) => setFormData({ ...formData, journeyComplete: e.value })} />
+                                </div>
+                                <button
+                                    onClick={handleEdit}
+                                    className="basicDarkButton m-2">
+                                    Submit
+                                </button>
 
+                            </div>
+                        </motion.div>
                 }
-
-            </button>
-        </div>
-        <div className={`p-12 ${mapExpanded?'opacity-5':'opacity-100'}`}>
-            <h1 className="text-3xl font-bold">{data.journey.journeyName}</h1>
-            <div>
-                <div className="grid grid-cols-[repeat(3,1fr),2fr,1fr,1fr] text-center text-xs uppercase mt-12">
-                    <p className="border-2 p-2">Journey Id</p>
-                    <p className="border-2 p-2">Convoy Size</p>
-                    <p className="border-2 p-2">End Location</p>
-                    <p className="border-2 p-2">Purpose</p>
-                    <p className="border-2 p-2">Start Location</p>
-                    <p className="border-2 p-2">Start Time</p>
-                </div>
-
-                <div className="grid grid-cols-[repeat(3,1fr),2fr,1fr,1fr] text-center text-sm font-semibold mb-2">
-                    <p className="border-2 p-2">{data.journey.journeyId}</p>
-                    <p className="border-2 p-2">{data.journey.convoySize}</p>
-                    <p className="border-2 p-2">{data.journey.journeyEndLocation}</p>
-                    <p className="border-2 p-2">{data.journey.journeyPurpose}</p>
-                    <p className="border-2 p-2">{data.journey.journeyStartLocation}</p>
-                    <p className="border-2 p-2">{data.journey.journeyStartTime}</p>
-                </div>
-            </div>
-            <div className='text-sm'>
-                <div className="grid grid-cols-7">
-                    <span className='text-xs uppercase border-2 p-2'>Id</span>
-                    <span className='text-xs uppercase border-2 p-2'>device Id</span>
-                    <span className='text-xs uppercase border-2 p-2'>device name</span>
-                    <span className='text-xs uppercase border-2 p-2'>vehicle Position</span>
-                    <span className='text-xs uppercase border-2 p-2'>vehicle Number</span>
-                    <span className='text-xs uppercase border-2 p-2'>vehicle Model</span>
-                    <span className='text-xs uppercase border-2 p-2'>vehicle Company</span>
-                </div>
-                {
-                    _.map(data.convoy, (item, idx) => {
-                        return <div key={idx} className="grid grid-cols-7">
-                            <p className='border-2 p-2 font-semibold'>{item.id}</p>
-                            <p className='border-2 p-2 font-semibold'>{item.device.deviceId}</p>
-                            <p className='border-2 p-2 font-semibold'>{item.device.deviceName}</p>
-                            <p className='border-2 p-2 font-semibold'>{item.vehiclePosition}</p>
-                            <p className='border-2 p-2 font-semibold'>{item.vehicle.vehicleNumber}</p>
-                            <p className='border-2 p-2 font-semibold'>{item.vehicle.vehicleModel}</p>
-                            <p className='border-2 p-2 font-semibold'>{item.vehicle.vehicleCompany}</p>
-                        </div>
-                    })
-                }
             </div>
         </div>
-    </div>
-);
+    );
 };
 
 export default Route;
