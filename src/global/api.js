@@ -72,4 +72,5 @@ export const createJourney = (obj) => callApiAndReturnDataPost(obj, "/mapper/new
 export const availableObjects = (obj) => callApiAndReturnDataGet(obj, '/mapper/new_journey/')
 export const createUser = (obj) => callApiAndReturnDataPost(obj, "/login/register/")
 export const detailedView = (obj) => callApiAndReturnDataPost(obj, '/mapper/journey_by_id/')
-export const editJourney = (obj) => callApiAndReturnDataPost(obj, '/mapper/journey_by_id/')
+export const editJourney = (obj) => callApiAndReturnDataPost(obj, '/mapper/update_journey/')
+export const completedJourney = (obj) => callApiAndReturnDataPost(obj, '/mapper/completed_journeys/')

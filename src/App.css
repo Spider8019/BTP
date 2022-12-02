@@ -258,3 +258,14 @@ input[type="file"] {
   width: 2rem;
   background-color: var(--base-color);
 }
+.p-tabview-nav{
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+}
+.p-tabview-title{
+  text-align: center !important;
+}
+.p-tabview-nav-link{
+  display:grid !important;
+  place-content:center !important;
+}
