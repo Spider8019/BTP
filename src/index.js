@@ -9,6 +9,8 @@ import {
   QueryClient,
   QueryClientProvider,
 } from 'react-query'
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
