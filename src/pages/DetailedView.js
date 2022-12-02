@@ -29,7 +29,9 @@ const Route = () => {
         journeyComplete: false
     });
     const handleEdit = async () => {
-        const response = await editJourney(formData)
+        const response = await editJourney({...formData,journeyId:data.journey.journeyId,convoySize:data.journey.convoySize})
+        console.log(response)
+        alert(response.data)
     }
 
     useEffect(() => {
