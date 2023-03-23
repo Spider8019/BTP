@@ -26,7 +26,7 @@ export default function Login() {
     if (formData.email && formData.password) {
       loginProfile({ username: formData.email, password: formData.password }).then(res => {
         localStorage.setItem("token", res.token)
-        navigate("/map")
+        navigate("/alllist")
         setError("")
       }).catch(err => { setError("Unable To Login"); console.log(err) })
         .finally(() => {

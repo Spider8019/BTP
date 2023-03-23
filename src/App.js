@@ -6,34 +6,34 @@ import _ from 'lodash';
 
 function App() {
 
-  const [msgs,setMsgs]=useState("")
-  let client = new W3CWebSocket('ws://127.0.0.1:8000/ws/' + this.state.room + '/');
+  // const [msgs,setMsgs]=useState("")
+  // let client = new W3CWebSocket('ws://127.0.0.1:8000/ws/');
 
-  useEffect(() => {
-    client.onopen = () => {
-      console.log("WebSocket Client Connected");
-    };
-    client.onmessage = (message) => {
-      const dataFromServer = JSON.parse(message.data);
-      if (dataFromServer) {
-        setMsgs([
-            ...msgs,
-            {
-              msg: dataFromServer.text,
-              name: dataFromServer.sender,
-            },
-          ]);
-      }
-    };
-  }, [])
+  // useEffect(() => {
+  //   client.onopen = () => {
+  //     console.log("WebSocket Client Connected");
+  //   };
+  //   client.onmessage = (message) => {
+  //     const dataFromServer = JSON.parse(message.data);
+  //     if (dataFromServer) {
+  //       setMsgs([
+  //           ...msgs,
+  //           {
+  //             msg: dataFromServer.text,
+  //             name: dataFromServer.sender,
+  //           },
+  //         ]);
+  //     }
+  //   };
+  // }, [])
 
   return (
     <>
-    {
+    {/* {
       _.map((msgs,idx)=>{
         return <p key={idx}>asd</p>
       })
-    }
+    } */}
       <AllRoutes />
     </>
   );

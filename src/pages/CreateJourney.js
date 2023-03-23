@@ -24,6 +24,7 @@ const Createjourney = () => {
     });
     const createANewJourney = async () => {
         const confirm = window.confirm("Please confirm ?");
+        console.log(formData)
         if (confirm) {
             console.log({ ...formData, journeyStartTime: new Date(formData.journeyStartTime).toISOString().replace('Z', '') })
             const response = await createJourney({ ...formData, journeyStartTime: new Date(formData.journeyStartTime).toISOString().replace('Z', '') })
@@ -101,7 +102,7 @@ const Createjourney = () => {
                         onChange={(e) => setSelectedPair({ ...selectedPair, deviceId: e.target.value })}
                     >
                         <option value="" disabled hidden>Choose here</option>
-                        {_.map(_.difference(availableDevices, _.map(formData.convoyList, item => item.deviceId)), (x, idx) => { return <option key={idx} value={x.deviceName}>{x.deviceId} :: {x.deviceName}</option> })}
+                        {_.map(_.difference(availableDevices, _.map(formData.convoyList, item => item.deviceId)), (x, idx) => { return <option key={idx} value={x.deviceId}>{x.deviceId} :: {x.deviceName}</option> })}
                     </select>
                     <select className='standardInput'
                         value={selectedPair.vehicleNumber}

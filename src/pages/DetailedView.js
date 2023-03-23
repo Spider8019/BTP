@@ -12,8 +12,9 @@ import { editJourney } from "../global/api";
 
 const Route = () => {
     const [searchParams] = useSearchParams();
+    const [final, setFinal] = useState([])
     console.log(searchParams.get('journeyId'))
-    const [toggleEdit, setToggleEdit] = useState(false)
+    const [toggleEdit, setToggleEdit] = useState(true)
     const location = useLocation();
     const MapElement = useRef(null);
     const [mapExpanded, setMapExpanded] = useState(false)
@@ -29,7 +30,7 @@ const Route = () => {
         journeyComplete: false
     });
     const handleEdit = async () => {
-        const response = await editJourney({...formData,journeyId:data.journey.journeyId,convoySize:data.journey.convoySize})
+        const response = await editJourney({ ...formData, journeyId: data.journey.journeyId, convoySize: data.journey.convoySize })
         console.log(response)
         alert(response.data)
     }
@@ -52,9 +53,6 @@ const Route = () => {
                 }
             ).then(async ([MapView, WebMap, Graphic, Point, watchUtils, Multipoint]) => {
 
-                let { location: res } = await detailedView({
-                    journeyId: searchParams.get('journeyId')
-                });
 
                 const webmap = new WebMap({
                     basemap: "topo-vector",
@@ -62,131 +60,143 @@ const Route = () => {
 
                 var view = new MapView({
                     map: webmap,
-                    center: [res[0][0] && res[0][0].longitude, res[0][0] && res[0][0].latitude],
-                    zoom: 5,
+                    center: [0,0],
+                    zoom: 3,
                     container: MapElement.current,
                 });
-                res.forEach((item, index) => {
-                    if (res[index].length > 0) {
-                        const polyline = {
-                            type: "polyline",
-                            paths: [
-                                res[index]
-                                    .map((item) => [item.longitude, item.latitude]),
-                            ],
-                        };
-                        const polylineGraphic = new Graphic({
-                            geometry: polyline,
-                            symbol: {
-                                type: "cim", // autocasts as CIMSymbol
-                                data: {
-                                    type: "CIMSymbolReference",
+                const interval = setInterval(() => {
+                    detailedView({
+                        journeyId: searchParams.get('journeyId')
+                    }).then(data => {
+                        console.log(data)
+                        const {location:res}=data;
+                        res && res.forEach((item, index) => {
+                            if (res[index].length > 0) {
+                                const polyline = {
+                                    type: "polyline",
+                                    paths: [
+                                        res[index]
+                                            .map((item) => [item.longitude, item.latitude]).reverse(),
+                                    ],
+                                };
+                                const polylineGraphic = new Graphic({
+                                    geometry: polyline,
                                     symbol: {
-                                        type: "CIMLineSymbol",
-                                        symbolLayers: [
-                                            {
-                                                // black 1px line symbol
-                                                type: "CIMSolidStroke",
-                                                enable: true,
-                                                width: 2,
-                                                color: colorLine[index],
-                                            },
-                                            {
-                                                // arrow symbol
-                                                type: "CIMVectorMarker",
-                                                enable: true,
-                                                size: 6,
-                                                markerPlacement: {
-                                                    type: "CIMMarkerPlacementAlongLineSameSize", // places same size markers along the line
-                                                    endings: "WithMarkers",
-                                                    placementTemplate: [19.5], // determines space between each arrow
-                                                    angleToLine: true, // symbol will maintain its angle to the line when map is rotated
-                                                },
-                                                frame: {
-                                                    xmin: -5,
-                                                    ymin: -5,
-                                                    xmax: 5,
-                                                    ymax: 5,
-                                                },
-                                                markerGraphics: [
+                                        type: "cim", // autocasts as CIMSymbol
+                                        data: {
+                                            type: "CIMSymbolReference",
+                                            symbol: {
+                                                type: "CIMLineSymbol",
+                                                symbolLayers: [
                                                     {
-                                                        type: "CIMMarkerGraphic",
-                                                        geometry: {
-                                                            rings: [
-                                                                [
-                                                                    [-8, -5.47],
-                                                                    [-8, 5.6],
-                                                                    [1.96, -0.03],
-                                                                    [-8, -5.47],
-                                                                ],
-                                                            ],
+                                                        // black 1px line symbol
+                                                        type: "CIMSolidStroke",
+                                                        enable: true,
+                                                        width: 2,
+                                                        color: colorLine[index],
+                                                    },
+                                                    {
+                                                        // arrow symbol
+                                                        type: "CIMVectorMarker",
+                                                        enable: true,
+                                                        size: 6,
+                                                        markerPlacement: {
+                                                            type: "CIMMarkerPlacementAlongLineSameSize", // places same size markers along the line
+                                                            endings: "WithMarkers",
+                                                            placementTemplate: [19.5], // determines space between each arrow
+                                                            angleToLine: true, // symbol will maintain its angle to the line when map is rotated
                                                         },
-                                                        symbol: {
-                                                            type: "CIMPolygonSymbol",
-                                                            symbolLayers: [
-                                                                {
-                                                                    type: "CIMSolidFill",
-                                                                    enable: true,
-                                                                    color: [0, 10, 0, 255],
+                                                        frame: {
+                                                            xmin: -5,
+                                                            ymin: -5,
+                                                            xmax: 5,
+                                                            ymax: 5,
+                                                        },
+                                                        markerGraphics: [
+                                                            {
+                                                                type: "CIMMarkerGraphic",
+                                                                geometry: {
+                                                                    rings: [
+                                                                        [
+                                                                            [-8, -5.47],
+                                                                            [-8, 5.6],
+                                                                            [1.96, -0.03],
+                                                                            [-8, -5.47],
+                                                                        ],
+                                                                    ],
                                                                 },
-                                                            ],
-                                                        },
+                                                                symbol: {
+                                                                    type: "CIMPolygonSymbol",
+                                                                    symbolLayers: [
+                                                                        {
+                                                                            type: "CIMSolidFill",
+                                                                            enable: true,
+                                                                            color: [0, 10, 0, 255],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            },
+                                                        ],
                                                     },
                                                 ],
                                             },
-                                        ],
+                                        },
                                     },
-                                },
-                            },
+                                });
+                                view.graphics.add(polylineGraphic);
+
+                                let symbol = {
+                                    type: "simple-marker",
+                                    style: "circle",
+                                    color: "orange",
+                                    size: "10px",
+                                    outline: {
+                                        color: [150, 200, 255],
+                                        width: 1,
+                                    },
+                                };
+
+                                let popupTemplate = {
+                                    title: "{Name}",
+                                    content: "{Description}",
+                                };
+                                res[index]
+                                    .forEach((item) => {
+                                        var point_symbol = new Point({
+                                            longitude: item.longitude,
+                                            latitude: item.latitude,
+                                            spatialReference: { wkid: 3857 },
+                                        });
+                                        var graphic_symbol = new Graphic({
+                                            geometry: point_symbol,
+                                            symbol,
+                                            attributes: {
+                                                Name: `<b>Convoy Id ${item.convoyId}</b>`,
+                                                Description: `<div><b>Timestamp: ${item.timeStamp}<br/>Longitude: ${item.longitude}<br/>Latitude: ${item.latitude}`,
+                                            },
+                                            popupTemplate,
+                                        });
+                                        view.graphics.add(graphic_symbol);
+                                    });
+                            }
+                        })
+                        // }
+                        watchUtils.whenTrue(view, "updating", function (evt) {
+                            if (document.getElementById("loaderElement"))
+                                document.getElementById("loaderElement").style.display = "block";
                         });
-                        view.graphics.add(polylineGraphic);
 
-                        let symbol = {
-                            type: "simple-marker",
-                            style: "circle",
-                            color: "orange",
-                            size: "18px",
-                            outline: {
-                                color: [150, 200, 255],
-                                width: 5,
-                            },
-                        };
-
-                        let popupTemplate = {
-                            title: "{Name}",
-                            content: "{Description}",
-                        };
-                        res[index]
-                            .forEach((item) => {
-                                var point_symbol = new Point({
-                                    longitude: item.longitude,
-                                    latitude: item.latitude,
-                                    spatialReference: { wkid: 3857 },
-                                });
-                                var graphic_symbol = new Graphic({
-                                    geometry: point_symbol,
-                                    symbol,
-                                    attributes: {
-                                        Name: `<b>MMSI ${item.timestamp}</b>`,
-                                        Description: `<div><b>Longitude: ${item.longitude}<br/>Latitude: ${item.latitude}`,
-                                    },
-                                    popupTemplate,
-                                });
-                                view.graphics.add(graphic_symbol);
-                            });
-                    }
-                })
-                // }
-                watchUtils.whenTrue(view, "updating", function (evt) {
-                    if (document.getElementById("loaderElement"))
-                        document.getElementById("loaderElement").style.display = "block";
-                });
-
-                // Hide the loading indicator when the view stops updating
-                watchUtils.whenFalse(view, "updating", function (evt) {
-                    if (document.getElementById("loaderElement"))
-                        document.getElementById("loaderElement").style.display = "none";
-                });
+                        // Hide the loading indicator when the view stops updating
+                        watchUtils.whenFalse(view, "updating", function (evt) {
+                            if (document.getElementById("loaderElement"))
+                                document.getElementById("loaderElement").style.display = "none";
+                        });
+                    })
+                }, 10000)
+                // let { location: res } = await detailedView({
+                //     journeyId: searchParams.get('journeyId')
+                // });
+                return () => clearInterval(interval);
             });
         })();
 
