@@ -55,7 +55,7 @@ const Route = () => {
 
 
                 const webmap = new WebMap({
-                    basemap: "topo-vector",
+                    basemap: "satellite",
                 });
 
                 var view = new MapView({
