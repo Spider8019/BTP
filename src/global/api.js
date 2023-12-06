@@ -62,7 +62,7 @@ const callApiAndReturnDataPostLogin = async (DATA, URL) => {
 // }
 
 // export const getProfile = (obj) => callApiAndReturnDataGet(obj,"profile")export const signupProfile = (obj) => callApiAndReturnDataPost(obj, "must/signup/")
-export const fetchingAllNovels=(obj)=>callApiAndReturnDataGet(obj,"/novels")
+export const fetchingAllNovels=(obj)=>callApiAndReturnDataGet(obj,"/novels/")
 export const fetchingAllLiveJourney = (obj) => callApiAndReturnDataPost(obj, "/mapper/live_journeys/")
 export const loginProfile = (obj) => callApiAndReturnDataPostLogin(obj, "/login/login/")
 export const createJourney = (obj) => callApiAndReturnDataPost(obj, "/mapper/new_journey/")
