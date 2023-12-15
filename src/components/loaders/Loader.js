@@ -1,9 +1,13 @@
-import React from "react";
+import React from 'react'
 
-const Loader = ({ text = "Loading" }) => {
-    return (
-        <p className="loadingText">{text}</p>
-    );
-};
+import { ProgressBar } from 'primereact/progressbar'
 
-export default Loader;
+const Loader = ({ text = 'Loading' }) => {
+  return (
+    <div className="m-4">
+      <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
+    </div>
+  )
+}
+
+export default Loader

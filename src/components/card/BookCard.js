@@ -1,19 +1,32 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-const BookCard = ({ title, url, author }) => {
-  return (
-    <div className="h-80 shadow-2xl border-8 hover:shadow-[#f1d5bc] border-white bg-white rounded overflow-hidden m-4 relative">
-      <div className="w-full rounded overflow-hidden">
-        <img alt="" className="object-contain" src={url} />
-      </div>
-      <div
-        className=" text-sm absolute bottom-0 left-0 right-0 p-4"
-        style={{ background: 'linear-gradient(transparent,black)' }}
-      >
-        <p className="font-semibold text-white">{title}</p>
-        <p className="text-sm text-gray-100">{author}</p>
-      </div>
+import { Card } from 'primereact/card'
+
+const BookCard = ({ title, url, author, innerRef }) => {
+  const [max, setMax] = useState(false)
+  const header = (
+    <div className="relative bg-gray-200">
+      <i
+        onClick={() => setMax(!max)}
+        className={`absolute top-4 right-4 pi pi-window-${
+          max ? 'minimize' : 'maximize'
+        }`}
+      ></i>
+      <img
+        className={`h-60 object-top object-${max ? 'cover' : 'contain'}`}
+        alt={title}
+        src={url}
+      />
     </div>
+  )
+  return (
+    <Card ref={innerRef} title={title} subTitle={author} header={header} className='mx-4'>
+      <div className="">
+        {/* <div className="w-full rounded overflow-hidden">
+          <img alt="" className="object-contain" src={url} />
+        </div> */}
+      </div>
+    </Card>
   )
 }
 

@@ -1,7 +1,9 @@
 import './App.css'
 import AllRoutes from './routes/AllRoutes'
-import _ from 'lodash'
-import { QueryClient, QueryClientProvider } from 'react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import 'primereact/resources/themes/vela-blue/theme.css'
+import 'primereact/resources/primereact.min.css'
+import 'primeicons/primeicons.css'
 
 const queryClient = new QueryClient({})
 
