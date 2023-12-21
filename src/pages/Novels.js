@@ -1,16 +1,34 @@
 // MyComponent.js
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { MegaMenu } from 'primereact/megamenu'
 import BookCard from '../components/card/BookCard'
 import Loader from '../components/loaders/Loader'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useInView } from 'react-intersection-observer'
+import { motion, AnimatePresence } from 'framer-motion'
+import { defaults } from '../global/defaultValues'
+import ExpandedCard from '../components/card/ExpandedCard'
+import items from '../global/assets/megamenu'
 
 const Novels = () => {
   const { ref, inView } = useInView()
+  const [selectedId, setSelectedId] = useState(null)
+  const [selectedLanguage, setSelectedLanguage] = useState(null)
+  const [forceRerender, setForceRerender] = useState(false)
+  const [selectedGenre, setSelectedGenre] = useState(null)
+  const [selectedSort, setSelectedSort] = useState(null)
+
   const fetchingAllNovels = async ({ pageParam }) => {
+    const languageQuery = selectedLanguage
+      ? `&language=${selectedLanguage}`
+      : ''
+    const genreQuery = selectedGenre ? `&genre=${selectedGenre}` : ''
+    const sortQuery = selectedSort ? `&sort=${selectedSort}` : ''
+    // const res = await fetch(
+    //   `${defaults.baseBackendUrl}/novels?pageNumber=${pageParam}`,
+    // )
     const res = await fetch(
-      `https://books-temp-dev.vercel.app/novels?pageNumber=${pageParam}`,
+      `${defaults.baseBackendUrl}/novels?pageNumber=${pageParam}${languageQuery}${genreQuery}${sortQuery}`,
     )
     const rst = await res.json()
     return rst
@@ -23,6 +41,7 @@ const Novels = () => {
     fetchNextPage,
     isFetchingNextPage,
     hasNextPage,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['fetchingAllNovels'],
     queryFn: fetchingAllNovels,
@@ -32,12 +51,22 @@ const Novels = () => {
       return nextPage
     },
   })
-
+  console.log(selectedLanguage)
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage()
     }
   }, [inView, hasNextPage, fetchNextPage])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await refetch(undefined, undefined, {
+        onSuccess: () => setForceRerender((prev) => !prev),
+      })
+    }
+
+    fetchData()
+  }, [selectedLanguage, selectedGenre, refetch])
 
   if (status === 'pending') return <Loader />
 
@@ -46,60 +75,23 @@ const Novels = () => {
     data !== undefined &&
     data.pages.map((books) =>
       books.map((book, index) => {
-        if (books.length === index + 1) {
-          return <BookCard innerRef={ref} key={book.book_id} {...book} />
-        }
-        return <BookCard key={book.book_id} {...book} />
+        const isLastBook = books.length === index + 1
+
+        return (
+          <motion.div
+            key={book.book_id}
+            layoutId={book.book_id}
+            onClick={() => setSelectedId(book.book_id)}
+          >
+            {isLastBook ? (
+              <BookCard innerRef={ref} {...book} />
+            ) : (
+              <BookCard {...book} />
+            )}
+          </motion.div>
+        )
       }),
     )
-
-  const items = [
-    {
-      label: 'Language',
-      icon: 'pi pi-fw pi-language',
-      items: [
-        [
-          {
-            label: 'National',
-            items: [{ label: 'Hindi' }],
-          },
-          {
-            label: 'International',
-            items: [{ label: 'English' }],
-          },
-        ],
-      ],
-    },
-    {
-      label: 'Genres',
-      icon: 'pi pi-fw pi-sitemap',
-      items: [
-        [
-          {
-            label: 'Fiction',
-            items: [
-              { label: 'Fantasy' },
-              { label: 'Science Fiction' },
-              { label: 'Dystopian' },
-              { label: 'Action & Adventure' },
-              { label: 'Mystery' },
-              { label: 'Horro' },
-              { label: 'Thriller & Suspense' },
-            ],
-          },
-          {
-            label: 'Nonfiction genres',
-            items: [
-              { label: 'Memoir & Autobiography' },
-              { label: 'Biography' },
-              { label: 'Food & Drink' },
-              { label: 'Art & Photography' },
-            ],
-          },
-        ],
-      ],
-    },
-  ]
 
   return (
     <div className="p-4 sm:p-8 bg-slate-50  ">
@@ -107,8 +99,21 @@ const Novels = () => {
         <p>PAPER PANTRY</p>
         <p className="text-4xl font-bold mb-8">Novels in stock</p>
       </div>
-      <MegaMenu model={items} breakpoint="960px" />
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-8 mt-8">
+      <MegaMenu
+        model={items({
+          refetch,
+          setForceRerender,
+          setSelectedGenre,
+          setSelectedLanguage,
+          setSelectedSort,
+        })}
+        breakpoint="960px"
+      />
+      {/* <button onClick={() => setFilter("English")}>adfa</button> */}
+      <div
+        className="grid grid-cols-1 sm:grid-cols-4 gap-8 mt-8"
+        key={forceRerender}
+      >
         {content}
       </div>
       {isFetchingNextPage && <Loader />}

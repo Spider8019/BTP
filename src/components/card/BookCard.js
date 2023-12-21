@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-
 import { Card } from 'primereact/card'
 
-const BookCard = ({ title, url, author, innerRef }) => {
+const BookCard = ({ title, url, author, innerRef,preface }) => {
   const [max, setMax] = useState(false)
   const header = (
     <div className="relative bg-gray-200">
@@ -20,13 +19,19 @@ const BookCard = ({ title, url, author, innerRef }) => {
     </div>
   )
   return (
-    <Card ref={innerRef} title={title} subTitle={author} header={header} className='mx-4'>
-      <div className="">
-        {/* <div className="w-full rounded overflow-hidden">
-          <img alt="" className="object-contain" src={url} />
-        </div> */}
-      </div>
-    </Card>
+      <Card
+        layout
+        role="region"
+        ref={innerRef}
+        title={title}
+        subTitle={author}
+        header={header}
+        className="mx-4 h-full"
+      >
+        <div className="">
+          <p className='text-sm line-clamp-5'>{preface}</p>
+        </div>
+      </Card>
   )
 }
 
