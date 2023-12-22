@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Card } from 'primereact/card'
 
-const BookCard = ({ title, url, author, innerRef,preface }) => {
+const BookCard = ({ title, url, author, innerRef, preface, book_id }) => {
   const [max, setMax] = useState(false)
   const header = (
     <div className="relative bg-gray-200">
@@ -19,19 +19,19 @@ const BookCard = ({ title, url, author, innerRef,preface }) => {
     </div>
   )
   return (
-      <Card
-        layout
-        role="region"
-        ref={innerRef}
-        title={title}
-        subTitle={author}
-        header={header}
-        className="mx-4 h-full"
-      >
-        <div className="">
-          <p className='text-sm line-clamp-5'>{preface}</p>
-        </div>
-      </Card>
+    <Card
+      layout
+      role="region"
+      ref={innerRef}
+      title={title}
+      subTitle={author}
+      header={header}
+      className="mx-4 h-full"
+    >
+      <div className="">
+        <p className="text-sm line-clamp-5">{preface}</p>
+      </div>
+    </Card>
   )
 }
 

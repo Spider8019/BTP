@@ -6,6 +6,7 @@ import DefaultLoader from '../components/loaders/DefaultLoader'
 import Login from '../pages/Login'
 import Dashboard from '../pages/Dashboard'
 import Novels from '../pages/Novels'
+import Novel from '../pages/Novel'
 
 const AllRoutes = () => {
   return (
@@ -15,6 +16,7 @@ const AllRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/novels" element={<Novels />} />
+          <Route path="/novel/:book_id" element={<Novel />} />
 
           <Route
             path="*"

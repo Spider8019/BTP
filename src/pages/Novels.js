@@ -24,9 +24,6 @@ const Novels = () => {
       : ''
     const genreQuery = selectedGenre ? `&genre=${selectedGenre}` : ''
     const sortQuery = selectedSort ? `&sort=${selectedSort}` : ''
-    // const res = await fetch(
-    //   `${defaults.baseBackendUrl}/novels?pageNumber=${pageParam}`,
-    // )
     const res = await fetch(
       `${defaults.baseBackendUrl}/novels?pageNumber=${pageParam}${languageQuery}${genreQuery}${sortQuery}`,
     )
@@ -82,6 +79,9 @@ const Novels = () => {
             key={book.book_id}
             layoutId={book.book_id}
             onClick={() => setSelectedId(book.book_id)}
+            style={{
+              gridColumn: book.book_id === selectedId ? 'span 2' : 'span 1',
+            }}
           >
             {isLastBook ? (
               <BookCard innerRef={ref} {...book} />
@@ -97,7 +97,7 @@ const Novels = () => {
     <div className="p-4 sm:p-8 bg-slate-50  ">
       <div className="text-center sm:text-left">
         <p>PAPER PANTRY</p>
-        <p className="text-4xl font-bold mb-8">Novels in stock</p>
+        <p className="text-4xl font-bold mb-8">Books in stock</p>
       </div>
       <MegaMenu
         model={items({
